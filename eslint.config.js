@@ -1,23 +1,5 @@
-import { FlatCompat } from '@eslint/eslintrc';
-import js from '@eslint/js';
-
-new FlatCompat({
-   baseDirectory: import.meta.url,
-});
-
-export default [
-   js.configs.recommended,
+module.exports = [
    {
-      files: ['**/*.js', '**/*.cjs'],
-      languageOptions: {
-         ecmaVersion: 'latest',
-         sourceType: 'module',
-      },
-      environment: {
-         commonjs: true,
-         es2021: true,
-         node: true,
-      },
       rules: {
          'no-multiple-empty-lines': ['error', { max: 3, maxBOF: 0 }],
          quotes: ['error', 'single'],
