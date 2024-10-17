@@ -13,7 +13,6 @@ module.exports = [
          'no-trailing-spaces': 'error',
          'brace-style': ['error', '1tbs'],
          'no-self-compare': 'error',
-         camelcase: 'error',
          'capitalized-comments': [
             'error',
             'always',
