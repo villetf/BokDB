@@ -9,15 +9,29 @@ async function downloadFile(itemLink) {
    fs.writeFileSync('/tmp/books.xlsx', response.data);
 }
 
-function convertToCSV() {
+function convertToJSON() {
    const workbook = xlsx.readFile('/tmp/books.xlsx');
    const sheetName = workbook.SheetNames[0];
    const worksheet = workbook.Sheets[sheetName];
-   const csvData = xlsx.utils.sheet_to_csv(worksheet);
-   return csvData;
+   const jsonData = xlsx.utils.sheet_to_json(worksheet);
+   return jsonData;
+}
+
+function checkForChanges(json) {
+   if (!fs.existsSync('/tmp/oldFile.json')) {
+      fs.writeFileSync('/tmp/oldFile.json', '');
+
+   }
+   const oldJson = fs.readFileSync('/tmp/oldFile.json', 'utf8');
+   if (oldJson == JSON.stringify(json)) {
+      return false;
+   }
+   fs.writeFileSync('/tmp/oldFile.json', JSON.stringify(json));
+   return true;
 }
 
 export default {
    downloadFile,
-   convertToCSV
+   convertToJSON,
+   checkForChanges
 };
