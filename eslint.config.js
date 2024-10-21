@@ -1,4 +1,4 @@
-module.exports = [
+export default [
    {
       rules: {
          'no-multiple-empty-lines': ['error', { max: 3, maxBOF: 0 }],
