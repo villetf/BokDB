@@ -12,8 +12,8 @@ setInterval(async() => {
    const jsonHasChanged = handleFile.checkForChanges(json);
    if (jsonHasChanged) {
       console.log('fil har ändrats');
+      handleDbOperations.writeToDb(json);
    } else {
       console.log('fil har inte ändrats');
    }
-   // handleDbOperations.writeToDb(json);
 }, 2000);
