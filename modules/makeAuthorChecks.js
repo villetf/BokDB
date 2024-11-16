@@ -14,6 +14,7 @@ async function checkAuthors(json) {
       }
    });
 
+   // Kollar om det finnas några författare i databasen som inte finns i excelarket
    checkDeletedAuthors(dbAuthorsList, json, connection);
 
    for (const book in json) {
