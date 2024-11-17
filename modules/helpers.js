@@ -13,7 +13,14 @@ export function getIndividualAuthors(json) {
             birthYear: book.Födelseår,
             country: book.Land
          };
-         if (!completeList.includes(author)) {
+         if (authorInfo.gender == 'Par') {
+            authorInfo.gender = null;
+         }
+         const nameList = [];
+         completeList.forEach(name => {
+            nameList.push(name.fullName);
+         });
+         if (!nameList.includes(author)) {
             completeList.push(authorInfo);
          }
       });
