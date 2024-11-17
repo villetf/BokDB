@@ -1,9 +1,11 @@
-import getConnection from './getDbConnection.js';
+import getDbConnection from './getDbConnection.js';
+import { getFirstName, getIndividualAuthors, getLastName } from './helpers.js';
+
+
 
 async function checkAuthors(json) {
-   const connection = await getConnection();
+   const connection = await getDbConnection.getConnection();
    const authors = await connection.query('SELECT first_name, last_name FROM authors;');
-   // connection.release();
    // Listan över alla författare som finns i databasen stoppas i dbAuthorsList
    const dbAuthorsList = [];
    authors[0].forEach(author => {
@@ -13,70 +15,57 @@ async function checkAuthors(json) {
          dbAuthorsList.push(author.last_name + ', ' + author.first_name);
       }
    });
+   const excelAuthors = getIndividualAuthors(json);
 
-   // Kollar om det finnas några författare i databasen som inte finns i excelarket
-   checkDeletedAuthors(dbAuthorsList, json, connection);
-
-   for (const book in json) {
-      const currentBook = json[book];
-      if (!currentBook.Författare) {
-         return;
-      }
-      const allAuthors = currentBook.Författare.split('&');
-      allAuthors.forEach(async author => {
-         author = author.trim();
-         if (!dbAuthorsList.includes(author)) {
-            dbAuthorsList.push(author);
-            await writeNewAuthor(author, currentBook, connection);
-         } else {
-            // await editAuthor(author, currentBook, connection);
-         }
-      });
-   }
-
-
+   checkNewAuthors(dbAuthorsList, excelAuthors, connection);
+   checkDeletedAuthors(dbAuthorsList, excelAuthors, connection);
 }
 
-function checkDeletedAuthors(dbAuthorsList, json, connection) {
-   const excelAuthors = [];
-   json.forEach(book => {
-      if (!book.Författare) {
-         return;
+// Kollar om det finns några författare i excelarket som inte finns i databasen
+async function checkNewAuthors(dbAuthorsList, excelAuthors, connection) {
+   excelAuthors.forEach(async author => {
+      if (!dbAuthorsList.includes(author.fullName)) {
+         dbAuthorsList.push(author.fullName);
+         await writeNewAuthor(author, connection);
       }
-      const allAuthors = book.Författare.split(' & ');
-      allAuthors.forEach(author => {
-         author = author.trim();
-         if (!excelAuthors.includes(author)) {
-            console.log(author);
-            excelAuthors.push(author);
-         }
-      });
    });
+}
 
+// Kollar om det finnas några författare i databasen som inte finns i excelarket
+function checkDeletedAuthors(dbAuthorsList, excelAuthors, connection) {
+   const excelAuthorsNames = [];
+   excelAuthors.forEach(author => {
+      excelAuthorsNames.push(author.fullName);
+   });
    dbAuthorsList.forEach(author => {
-      if (!excelAuthors.includes(author)) {
-         connection.query('');
+      if (!excelAuthorsNames.includes(author)) {
+         console.log('nu har det ändrats');
+         console.log(author);
+         const firstName = getFirstName(author);
+         const lastName = getLastName(author);
+         connection.query(`DELETE FROM authors WHERE first_name = '${firstName}' AND last_name = '${lastName}';`);
       }
    });
 }
 
-async function writeNewAuthor(author, currentBook, connection) {
-   const firstName = author.replace(/.*, /, '');
-   let lastName = author.replace(/,.*/, '');
-   let gender = currentBook.Författarkön ?? null;
-   const birth_year = currentBook.Födelseår ?? null;
+// Lägger till ny författare i databasen
+async function writeNewAuthor(author, connection) {
+   const firstName = getFirstName(author.fullName);
+   let lastName = getLastName(author.fullName);
+   let gender = author.Författarkön ?? null;
+   const birth_year = author.Födelseår ?? null;
 
    if (gender === 'Par') {
       gender = null;
    }
 
-   if (!author.match(',')) {
+   if (!author.fullName.match(',')) {
       lastName = null;
    }
 
    let countryId = null;
-   if (currentBook.Land) {
-      const idData = await connection.query(`SELECT id FROM countries WHERE name = '${currentBook.Land}'`);
+   if (author.Land) {
+      const idData = await connection.query(`SELECT id FROM countries WHERE name = '${author.Land}'`);
       countryId = idData[0][0].id;
    }
 
@@ -85,11 +74,10 @@ async function writeNewAuthor(author, currentBook, connection) {
 }
 
 function editAuthor(author, currentBook, connection) {
-   console.log('finns redan');
-   console.log(author);
-   console.log(currentBook);
-   console.log('');
+
 }
+
+
 
 export default {
    checkAuthors
