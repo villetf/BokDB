@@ -19,6 +19,7 @@ async function checkAuthors(json) {
 
    checkNewAuthors(dbAuthorsList, excelAuthors, connection);
    checkDeletedAuthors(dbAuthorsList, excelAuthors, connection);
+   editAuthor(excelAuthors, connection);
 }
 
 // Kollar om det finns några författare i excelarket som inte finns i databasen
@@ -39,8 +40,6 @@ function checkDeletedAuthors(dbAuthorsList, excelAuthors, connection) {
    });
    dbAuthorsList.forEach(author => {
       if (!excelAuthorsNames.includes(author)) {
-         console.log('nu har det ändrats');
-         console.log(author);
          const firstName = getFirstName(author);
          const lastName = getLastName(author);
          connection.query(`DELETE FROM authors WHERE first_name = '${firstName}' AND last_name = '${lastName}';`);
@@ -52,12 +51,8 @@ function checkDeletedAuthors(dbAuthorsList, excelAuthors, connection) {
 async function writeNewAuthor(author, connection) {
    const firstName = getFirstName(author.fullName);
    let lastName = getLastName(author.fullName);
-   let gender = author.Författarkön ?? null;
+   const gender = author.Författarkön ?? null;
    const birth_year = author.Födelseår ?? null;
-
-   if (gender === 'Par') {
-      gender = null;
-   }
 
    if (!author.fullName.match(',')) {
       lastName = null;
@@ -73,8 +68,9 @@ async function writeNewAuthor(author, connection) {
    await connection.execute(sql, [firstName, lastName, gender, birth_year, countryId]);
 }
 
-function editAuthor(author, currentBook, connection) {
-
+function editAuthor(excelAuthors, connection) {
+   console.log('inne i edit');
+   console.log(excelAuthors);
 }
 
 
