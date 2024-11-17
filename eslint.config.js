@@ -41,7 +41,6 @@ export default [
          'implicit-arrow-linebreak': 'error',
          'key-spacing': 'error',
          'keyword-spacing': 'error',
-         'lines-around-comment': ['error', { beforeLineComment: true }],
          'max-len': [
             'error',
             {
