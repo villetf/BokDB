@@ -1,9 +1,9 @@
 import 'dotenv/config';
-import checkAuthors from './makeAuthorChecks.js';
+import makeAuthorChecks from './makeAuthorChecks.js';
 
 
-async function writeToDb(json) {
-   checkAuthors(json);
+function writeToDb(json) {
+   makeAuthorChecks.checkAuthors(json);
 }
 
 
