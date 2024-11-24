@@ -1,4 +1,4 @@
-export function getIndividualAuthors(json) {
+function getIndividualAuthors(json) {
    const completeList = [];
    json.forEach(book => {
       if (!book.Författare) {
@@ -28,11 +28,33 @@ export function getIndividualAuthors(json) {
    return completeList;
 }
 
-export function getFirstName(fullName) {
+function getFirstName(fullName) {
    return fullName.replace(/.*, /, '');
 }
 
-export function getLastName(fullName) {
+function getLastName(fullName) {
    return fullName.replace(/,.*/, '');
 }
 
+async function getCountryId(country, connection) {
+   const idData = await connection.query(`SELECT id FROM countries WHERE name = '${country}'`);
+   if (idData[0][0]) {
+      return idData[0][0].id;
+   }
+
+   return null;
+}
+
+function logError(error, errortype) {
+   const date = new Date().toLocaleString();
+   const errorString = `${date}\n${errortype} uppstod:\n${error.stack || error.message}\n\n`;
+   fs.appendFile('../errors.log', errorString);
+};
+
+export default {
+   getIndividualAuthors,
+   getFirstName,
+   getLastName,
+   getCountryId,
+   logError
+};
