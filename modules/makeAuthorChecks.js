@@ -1,8 +1,8 @@
 import getDbConnection from './getDbConnection.js';
-import { getFirstName, getIndividualAuthors, getLastName } from './helpers.js';
+import helpers from './helpers.js';
 
 
-
+// Kollar genom olika funktioner ifall någon författare har ändrats
 async function checkAuthors(json) {
    const connection = await getDbConnection.getConnection();
    const authors = await connection.query('SELECT first_name, last_name FROM authors;');
@@ -15,11 +15,11 @@ async function checkAuthors(json) {
          dbAuthorsList.push(author.last_name + ', ' + author.first_name);
       }
    });
-   const excelAuthors = getIndividualAuthors(json);
+   const excelAuthors = helpers.getIndividualAuthors(json);
 
    checkNewAuthors(dbAuthorsList, excelAuthors, connection);
    checkDeletedAuthors(dbAuthorsList, excelAuthors, connection);
-   editAuthor(excelAuthors, connection);
+   editAuthor(dbAuthorsList, excelAuthors, connection);
 }
 
 // Kollar om det finns några författare i excelarket som inte finns i databasen
@@ -40,8 +40,8 @@ function checkDeletedAuthors(dbAuthorsList, excelAuthors, connection) {
    });
    dbAuthorsList.forEach(author => {
       if (!excelAuthorsNames.includes(author)) {
-         const firstName = getFirstName(author);
-         const lastName = getLastName(author);
+         const firstName = helpers.getFirstName(author);
+         const lastName = helpers.getLastName(author);
          connection.query(`DELETE FROM authors WHERE first_name = '${firstName}' AND last_name = '${lastName}';`);
       }
    });
@@ -49,8 +49,8 @@ function checkDeletedAuthors(dbAuthorsList, excelAuthors, connection) {
 
 // Lägger till ny författare i databasen
 async function writeNewAuthor(author, connection) {
-   const firstName = getFirstName(author.fullName);
-   let lastName = getLastName(author.fullName);
+   const firstName = helpers.getFirstName(author.fullName);
+   let lastName = helpers.getLastName(author.fullName);
    const gender = author.Författarkön ?? null;
    const birth_year = author.Födelseår ?? null;
 
@@ -60,17 +60,32 @@ async function writeNewAuthor(author, connection) {
 
    let countryId = null;
    if (author.Land) {
-      const idData = await connection.query(`SELECT id FROM countries WHERE name = '${author.Land}'`);
+      const idData = await helpers.getCountryId(author.Land, connection);
       countryId = idData[0][0].id;
    }
 
    const sql = 'INSERT INTO authors (first_name, last_name, gender, birth_year, country_id) VALUES (?,?,?,?,?)';
-   await connection.execute(sql, [firstName, lastName, gender, birth_year, countryId]);
+   try {
+      await connection.execute(sql, [firstName, lastName, gender, birth_year, countryId]);
+   } catch (error) {
+      helpers.logError(error, 'Fel vid databasskrivning av ny författare');
+   }
 }
 
-function editAuthor(excelAuthors, connection) {
+// Kör en update-query mot alla existerande författare för att synka gjorda ändringar
+function editAuthor(dbAuthorsList, excelAuthors, connection) {
    console.log('inne i edit');
-   console.log(excelAuthors);
+   excelAuthors.forEach(async author => {
+      const sql = 'UPDATE authors SET gender = ?, birth_year = ?, country_id = ? WHERE first_name = ? AND last_name = ?';
+      const countryId = await helpers.getCountryId(author.country, connection);
+      const firstName = helpers.getFirstName(author.fullName);
+      const lastName = helpers.getLastName(author.fullName);
+      try {
+         await connection.execute(sql, [author.gender ?? null, author.birthYear ?? null, countryId, firstName, lastName]);
+      } catch (error) {
+         helpers.logError(error, 'Fel vid databasskrivning vid ändring av författare');
+      }
+   });
 }
 
 
