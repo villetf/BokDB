@@ -1,7 +1,6 @@
 import fs from 'fs';
 import talkWithGraph from './modules/talkWithGraph.js';
 import handleFile from './modules/handleFile.js';
-import handleDbOperations from './modules/handleDbOperations.js';
 import makeAuthorChecks from './makeAuthorChecks.js';
 
 setInterval(async() => {
