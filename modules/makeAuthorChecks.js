@@ -5,8 +5,9 @@ import helpers from './helpers.js';
 // Kollar genom olika funktioner ifall någon författare har ändrats
 async function checkAuthors(json) {
    const connection = await getDbConnection.getConnection();
+   let authors;
    try {
-      const authors = await connection.query('SELECT first_name, last_name FROM authors;');
+      authors = await connection.query('SELECT first_name, last_name FROM authors;');
    } catch (error) {
       logError(error, 'Fel vid databashämtning av befintliga författare');
    }
