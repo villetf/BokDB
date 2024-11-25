@@ -1,15 +1,15 @@
-import getDbConnection from './getDbConnection.js';
+import { getConnection } from './getDbConnection.js';
 import helpers from './helpers.js';
 
 
 // Kollar genom olika funktioner ifall någon författare har ändrats
 async function checkAuthors(json) {
-   const connection = await getDbConnection.getConnection();
+   const connection = await getConnection();
    let authors;
    try {
       authors = await connection.query('SELECT first_name, last_name FROM authors;');
    } catch (error) {
-      logError(error, 'Fel vid databashämtning av befintliga författare');
+      helpers.logError(error, 'Fel vid databashämtning av befintliga författare');
    }
    // Listan över alla författare som finns i databasen stoppas i dbAuthorsList
    const dbAuthorsList = [];
@@ -51,7 +51,7 @@ function checkDeletedAuthors(dbAuthorsList, excelAuthors, connection) {
          try {
             connection.query(`DELETE FROM authors WHERE first_name = '${firstName}' AND last_name = '${lastName}';`);
          } catch (error) {
-            logError(error, 'Fel vid radering av författare från databasen');
+            helpers.logError(error, 'Fel vid radering av författare från databasen');
          }
       }
    });
@@ -84,7 +84,6 @@ async function writeNewAuthor(author, connection) {
 
 // Kör en update-query mot alla existerande författare för att synka gjorda ändringar
 function editAuthor(excelAuthors, connection) {
-   console.log('inne i edit');
    excelAuthors.forEach(async author => {
       const sql = 'UPDATE authors SET gender = ?, birth_year = ?, country_id = ? WHERE first_name = ? AND last_name = ?';
       const countryId = await helpers.getCountryId(author.country, connection);
