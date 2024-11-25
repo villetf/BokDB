@@ -2,6 +2,7 @@ import fs from 'fs';
 import talkWithGraph from './modules/talkWithGraph.js';
 import handleFile from './modules/handleFile.js';
 import handleDbOperations from './modules/handleDbOperations.js';
+import makeAuthorChecks from './makeAuthorChecks.js';
 
 setInterval(async() => {
    const [token, newRefreshToken] = await talkWithGraph.getToken();
@@ -12,7 +13,7 @@ setInterval(async() => {
    const jsonHasChanged = handleFile.checkForChanges(json);
    if (jsonHasChanged) {
       console.log('fil har ändrats');
-      handleDbOperations.writeToDb(json);
+      makeAuthorChecks.checkAuthors(json);
    } else {
       console.log('fil har inte ändrats');
    }
