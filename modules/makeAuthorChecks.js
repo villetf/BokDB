@@ -5,7 +5,11 @@ import helpers from './helpers.js';
 // Kollar genom olika funktioner ifall någon författare har ändrats
 async function checkAuthors(json) {
    const connection = await getDbConnection.getConnection();
-   const authors = await connection.query('SELECT first_name, last_name FROM authors;');
+   try {
+      const authors = await connection.query('SELECT first_name, last_name FROM authors;');
+   } catch (error) {
+      logError(error, 'Fel vid databashämtning av befintliga författare');
+   }
    // Listan över alla författare som finns i databasen stoppas i dbAuthorsList
    const dbAuthorsList = [];
    authors[0].forEach(author => {
@@ -19,7 +23,7 @@ async function checkAuthors(json) {
 
    checkNewAuthors(dbAuthorsList, excelAuthors, connection);
    checkDeletedAuthors(dbAuthorsList, excelAuthors, connection);
-   editAuthor(dbAuthorsList, excelAuthors, connection);
+   editAuthor(excelAuthors, connection);
 }
 
 // Kollar om det finns några författare i excelarket som inte finns i databasen
@@ -42,7 +46,11 @@ function checkDeletedAuthors(dbAuthorsList, excelAuthors, connection) {
       if (!excelAuthorsNames.includes(author)) {
          const firstName = helpers.getFirstName(author);
          const lastName = helpers.getLastName(author);
-         connection.query(`DELETE FROM authors WHERE first_name = '${firstName}' AND last_name = '${lastName}';`);
+         try {
+            connection.query(`DELETE FROM authors WHERE first_name = '${firstName}' AND last_name = '${lastName}';`);
+         } catch (error) {
+            logError(error, 'Fel vid radering av författare från databasen');
+         }
       }
    });
 }
@@ -73,7 +81,7 @@ async function writeNewAuthor(author, connection) {
 }
 
 // Kör en update-query mot alla existerande författare för att synka gjorda ändringar
-function editAuthor(dbAuthorsList, excelAuthors, connection) {
+function editAuthor(excelAuthors, connection) {
    console.log('inne i edit');
    excelAuthors.forEach(async author => {
       const sql = 'UPDATE authors SET gender = ?, birth_year = ?, country_id = ? WHERE first_name = ? AND last_name = ?';
