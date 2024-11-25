@@ -1,3 +1,5 @@
+import fs from 'fs';
+
 function getIndividualAuthors(json) {
    const completeList = [];
    json.forEach(book => {
@@ -48,7 +50,7 @@ async function getCountryId(country, connection) {
 function logError(error, errortype) {
    const date = new Date().toLocaleString();
    const errorString = `${date}\n${errortype} uppstod:\n${error.stack || error.message}\n\n`;
-   fs.appendFile('../errors.log', errorString);
+   fs.appendFileSync('./errors.log', errorString);
 };
 
 export default {
