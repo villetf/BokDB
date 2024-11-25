@@ -13,7 +13,7 @@ async function getConnection() {
       const connection = await connectionPool.getConnection();
       return connection;
    } catch (error) {
-      console.error('Ett fel uppstod', error);
+      logError(error, 'Fel vid skapande av anslutningspool');
    }
 }
 
