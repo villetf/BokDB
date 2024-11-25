@@ -1,4 +1,5 @@
 import mysql2 from 'mysql2/promise';
+import helpers from './helpers.js';
 
 const connectionPool = mysql2.createPool({
    host: 'localhost',
@@ -8,12 +9,12 @@ const connectionPool = mysql2.createPool({
    database: 'bokdb'
 });
 
-async function getConnection() {
+export async function getConnection() {
    try {
       const connection = await connectionPool.getConnection();
       return connection;
    } catch (error) {
-      logError(error, 'Fel vid skapande av anslutningspool');
+      helpers.logError(error, 'Fel vid skapande av anslutningspool');
    }
 }
 
