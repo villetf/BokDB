@@ -24,6 +24,7 @@ async function checkAuthors(json) {
    checkNewAuthors(dbAuthorsList, excelAuthors, connection);
    checkDeletedAuthors(dbAuthorsList, excelAuthors, connection);
    editAuthor(excelAuthors, connection);
+   connection.release();
 }
 
 // Kollar om det finns några författare i excelarket som inte finns i databasen
