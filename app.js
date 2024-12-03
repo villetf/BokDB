@@ -15,6 +15,7 @@ setInterval(async() => {
       console.log('fil har ändrats');
       makeAuthorChecks.checkAuthors(json);
       makePreparingChecks.checkLanguages(json);
+      makePreparingChecks.checkGenres(json);
    } else {
       console.log('fil har inte ändrats');
    }
