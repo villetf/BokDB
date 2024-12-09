@@ -53,10 +53,36 @@ function logError(error, errortype) {
    fs.appendFileSync('./errors.log', errorString);
 };
 
+// listToLookIn är den lista som ska kollas, thingsToLookFor[secondProperty] är den förekomsten man ska leta efter
+function checkOccurenceInList(listToLookIn, thingsToLookFor, firstProperty, secondProperty) {
+
+   const returnList = [];
+   const isolatedListLookIn = [];
+   listToLookIn.forEach(thing => {
+      isolatedListLookIn.push(thing[firstProperty]);
+   });
+
+   thingsToLookFor.forEach(thing => {
+      let correctThing;
+      if (!secondProperty) {
+         correctThing = thing;
+      } else {
+         correctThing = thing[secondProperty];
+      }
+      if (!isolatedListLookIn.includes(correctThing)) {
+         returnList.push(thing);
+      }
+   });
+   return returnList;
+}
+
 export default {
    getIndividualAuthors,
    getFirstName,
    getLastName,
    getCountryId,
-   logError
+   logError,
+   checkOccurenceInList
 };
+
+

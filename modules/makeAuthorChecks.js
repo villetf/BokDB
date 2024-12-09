@@ -40,19 +40,15 @@ async function checkNewAuthors(dbAuthorsList, excelAuthors, connection) {
 
 // Kollar om det finnas några författare i databasen som inte finns i excelarket
 function checkDeletedAuthors(dbAuthorsList, excelAuthors, connection) {
-   const excelAuthorsNames = [];
-   excelAuthors.forEach(author => {
-      excelAuthorsNames.push(author.fullName);
-   });
-   dbAuthorsList.forEach(author => {
-      if (!excelAuthorsNames.includes(author)) {
-         const firstName = helpers.getFirstName(author);
-         const lastName = helpers.getLastName(author);
-         try {
-            connection.query(`DELETE FROM authors WHERE first_name = '${firstName}' AND last_name = '${lastName}';`);
-         } catch (error) {
-            helpers.logError(error, 'Fel vid radering av författare från databasen');
-         }
+   const deletedAuthors = helpers.checkOccurenceInList(excelAuthors, dbAuthorsList, 'fullName', null);
+
+   deletedAuthors.forEach(author => {
+      const firstName = helpers.getFirstName(author);
+      const lastName = helpers.getLastName(author);
+      try {
+         connection.query(`DELETE FROM authors WHERE first_name = "${firstName}" AND last_name = "${lastName}";`);
+      } catch (error) {
+         helpers.logError(error, 'Fel vid radering av författare från databasen');
       }
    });
 }
