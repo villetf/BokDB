@@ -3,6 +3,7 @@ import talkWithGraph from './modules/talkWithGraph.js';
 import handleFile from './modules/handleFile.js';
 import makeAuthorChecks from './modules/makeAuthorChecks.js';
 import makePreparingChecks from './modules/makePreparingChecks.js';
+import makeBookChecks from './modules/makeBookChecks.js';
 
 setInterval(async() => {
    const [token, newRefreshToken] = await talkWithGraph.getToken();
@@ -16,6 +17,7 @@ setInterval(async() => {
       makeAuthorChecks.checkAuthors(json);
       makePreparingChecks.checkLanguages(json);
       makePreparingChecks.checkGenres(json);
+      makeBookChecks.checkBooks(json);
    } else {
       console.log('fil har inte ändrats');
    }
